@@ -1,0 +1,43 @@
+/* settings */
+$cubic-quint: cubic-bezier(0.860, 0.000, 0.070, 1.000);
+
+$padding: 10px;
+$button-size: 44px;
+
+$font-body: 'Helvetica Neue', Verdana, Arial, Helvetica, sans-serif;
+$font-size: 18px;
+$font-lineheight: 32px;
+$font-color: #222;
+$body-color: #FFF;
+
+$primary-color: #f47f26;
+$primary-color-on: #ffab35;
+$primary-color-off: #ed721c;
+
+$header-height: 66px;
+
+// Grid
+$column-width: 320px;
+$column-gutter: 40px;
+
+$mq-phone: 480px !default;
+$mq-tablet: ($column-width*2) + ($column-gutter*3) !default;
+$mq-desktop: ($column-width*3) + ($column-gutter*4) !default;
+
+@mixin media-phone {
+	@media (max-width : $mq-phone) {
+		@content;
+	}
+}
+
+@mixin media-tablet {
+	@media (max-width : $mq-tablet) {
+		@content;
+	}
+}
+
+@mixin media-desktop {
+	@media (max-width : $mq-desktop) {
+		@content;
+	}
+}

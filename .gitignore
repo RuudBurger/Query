@@ -1,0 +1,12 @@
+node_modules
+*.log
+dist
+client/bower_components/*
+!client/bower_components/.gitkeep
+.tmp
+.grunt
+server/config/secrets.js
+.DS_Store
+.yo-rc.json
+.idea
+.jshintrc
