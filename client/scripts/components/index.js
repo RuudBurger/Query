@@ -4,11 +4,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Reflux from 'reflux';
 import {History} from 'react-router';
-import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 
 
 import MainActions from '../actions/main';
-import MainStore from '../stores/main';
+//import MainStore from '../stores/main';
 
 import classNames from 'classnames';
 import $ from 'jquery';

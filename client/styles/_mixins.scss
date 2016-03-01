@@ -4,17 +4,15 @@ $cubic-quint: cubic-bezier(0.860, 0.000, 0.070, 1.000);
 $padding: 10px;
 $button-size: 44px;
 
+$primary-color: #fe603b;
+
 $font-body: 'Helvetica Neue', Verdana, Arial, Helvetica, sans-serif;
 $font-size: 18px;
 $font-lineheight: 32px;
-$font-color: #222;
-$body-color: #FFF;
+$font-color: #FFF;
+$body-color: $primary-color;
 
-$primary-color: #f47f26;
-$primary-color-on: #ffab35;
-$primary-color-off: #ed721c;
-
-$header-height: 66px;
+$header-height: 44px;
 
 // Grid
 $column-width: 320px;
