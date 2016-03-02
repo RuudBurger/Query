@@ -92,6 +92,23 @@ export default React.createClass({
 		ipc.send('toggle-settings');
 	},
 
+	addDevice(e){
+		(e).preventDefault();
+
+		var last_device = this.state.devices[this.state.devices.length - 1];
+		var new_device_nr = last_device + 1;
+		var new_device = this.devices[new_device_nr];
+
+		var devices = this.state.devices;
+			devices.push(new_device_nr);
+
+		this.setState({
+			devices: devices
+		});
+
+		ipc.send('toggle-device', this.state.devices.length, new_device.size[0], new_device.size[1] + 44, new_device.userAgent || null);
+	},
+
 	enabledDevices(){
 		return this.state.devices.map(nr => this.devices[nr]);
 	},
@@ -164,7 +181,7 @@ export default React.createClass({
 						<div className="devices">
 							{devices}
 						</div>
-						<a href="#" className="add" ><span /><span /></a>
+						<a href="#" className="add" onClick={this.addDevice}><span /><span /></a>
 					</div>
 				</div>
 				<div className="sub">
