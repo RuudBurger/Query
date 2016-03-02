@@ -5,12 +5,14 @@ const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 
 let mainWindow;
-var device_windows = {}
+var settings_shown = false;
+var device_windows = [];
+var window_size = [750, 80];
 
 var createWindow = function () {
 	mainWindow = new BrowserWindow({
-		width: 750,
-		height: 80,
+		width: window_size[0],
+		height: window_size[1],
 		x: 2000,
 		y: 1500,
 		resizable: false,
@@ -29,13 +31,6 @@ var createWindow = function () {
 		mainWindow = null;
 	});
 
-	//mainWindow.on('focus', function(){
-	//	Object.keys(device_windows).forEach(key => {
-	//		if(device_windows[key]){
-	//			device_windows[key].focus();
-	//		}
-	//	});
-	//});
 };
 
 // Main window
@@ -55,27 +50,52 @@ app.on('activate', function () {
 });
 
 // Device windows
+electron.ipcMain.on('toggle-device', function(e, nr, width, height){
 
-electron.ipcMain.on('toggle-device', function(e, type, width, height){
-
-	var w = device_windows[type];
+	var w = device_windows[nr];
 	if (!w) {
 		w = new BrowserWindow({
 			width: width || 600,
 			height: height || 400,
+			minHeight: 100,
+			minWidth: 200,
 			frame: false
 		});
-		device_windows[type] = w;
+		device_windows[nr] = w;
 
 		// Emitted when the window is closed.
 		w.on('closed', function() {
 			w = null;
-			device_windows[type] = null;
+			device_windows[nr] = null;
+			mainWindow.webContents.send('close-device', nr);
 		});
+
+		w.loadURL('http://127.0.0.1:9010/#/device');
+		w.webContents.openDevTools();
 	}
 
-	w.loadURL('http://127.0.0.1:9010/#/device');
-	w.webContents.openDevTools();
+});
+
+electron.ipcMain.on('resize-device', function(e, nr, width, height){
+
+	var w = device_windows[nr];
+	if (w) {
+		w.focus();
+
+		var current = w.getBounds();
+
+		var diff_width = current.width - width,
+			diff_height = current.height - height;
+
+		current.width = width;
+		current.height = height;
+		current.x = current.x + (diff_width/2);
+		current.y = current.y + (diff_height/2);
+
+		console.log(diff_width, diff_width);
+
+		w.setBounds(current, true);
+	}
 
 });
 
@@ -87,9 +107,20 @@ electron.ipcMain.on('close-device', function(e){
 electron.ipcMain.on('set-url', function(e, url){
 	mainWindow.webContents.send('set-url', url);
 
-	Object.keys(device_windows).forEach(key => {
-		if(device_windows[key]){
-			device_windows[key].webContents.send('set-url', url);
-		}
+	device_windows.forEach(w => {
+		w.webContents.send('set-url', url);
 	});
+});
+
+electron.ipcMain.on('toggle-settings', function(e){
+	settings_shown = !settings_shown;
+
+	var width = window_size[0],
+		height = window_size[1];
+
+	if(settings_shown){
+		height += window_size[1];
+	}
+
+	mainWindow.setSize(width, height, true);
 });

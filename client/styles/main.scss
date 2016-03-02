@@ -20,6 +20,11 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+a {
+	text-decoration: none;
+	color: $font-color;
+}
+
 #wrapper, .app {
 	height: 100%;
 	width: 100%;
@@ -44,12 +49,20 @@ body {
 		background: $color;
 		opacity: 0;
 		transition: all 400ms;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 	}
 
 	.stand {
 		position: absolute;
 		transition: all 400ms;
 		transform-origin: 50% 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: $border;
+		bottom: 0;
+		height: $border;
 	}
 
 	.screen {
@@ -71,8 +84,8 @@ body {
 
 		.button {
 			opacity: 1;
-			bottom: $border;
 			left: 50%;
+			top: 90%;
 			transform: translateX(-50%);
 		}
 
@@ -86,7 +99,7 @@ body {
 
 			.button {
 				left: 85%;
-				bottom: 50%;
+				top: 50%;
 				transform: translateY(50%);
 			}
 
@@ -106,6 +119,10 @@ body {
 		&.landscape {
 			height: $width;
 			width: $height;
+
+			.button {
+				left: 90%;
+			}
 		}
 	}
 
@@ -118,9 +135,14 @@ body {
 
 		.stand {
 			bottom: -$border*3;
-			border-bottom: $border solid $color;
+			height: $border;
+			background: $color;
 			width: 140%;
-			left: -20%;
+		}
+
+		.button {
+			left: 100%;
+			top: 100%;
 		}
 
 	}
@@ -136,7 +158,7 @@ body {
 
 		.button {
 			opacity: 1;
-			bottom: $border;
+			top: 85%;
 			left: 50%;
 			transform: translateX(-50%);
 		}
@@ -202,112 +224,166 @@ body {
 	line-height: $font-lineheight;
 	font-weight: 400;
 	color: $font-color;
-
-	input, select, textarea {
-		color: inherit;
-		font-size: inherit;
-		line-height: inherit;
-	}
-
 	background: $body-color;
 	height: 100%;
 	width: 100%;
-	display: flex;
 
-	-webkit-app-region: drag;
+	.main {
+		height: 80px;
 
-	.input {
-		width: 100%;
-		padding: $padding;
+		input, select, textarea {
+			color: inherit;
+			font-size: inherit;
+			line-height: inherit;
+		}
+
 		display: flex;
-		align-items: center;
 
-		input {
-			display: block;
+		-webkit-app-region: drag;
+
+		.input {
 			width: 100%;
 			height: 100%;
 			padding: $padding;
-			border: 0;
-			background: rgba(255,255,255,.05);
-			border: 1px solid transparent;
+			display: flex;
 
-			&::-webkit-input-placeholder {
-				color: rgba(255,255,255,.7);
-				font-style: italic;
+			input {
+				display: block;
+				width: 100%;
+				height: 100%;
+				padding: $padding;
+				border: 0;
+				background: rgba(255,255,255,.05);
+				border: 1px solid transparent;
+
+				&::-webkit-input-placeholder {
+					color: rgba(255,255,255,.7);
+					font-style: italic;
+
+					&:focus {
+						color: rgba(255,255,255,1);
+					}
+				}
 
 				&:focus {
-					color: rgba(255,255,255,1);
+					background: rgba(255,255,255,.1);
+					outline: none;
 				}
 			}
+		}
 
-			&:focus {
-				background: rgba(255,255,255,.1);
-				outline: none;
+		.actions {
+			height: 100%;
+			width: auto;
+			display: flex;
+			padding-right: $padding;
+			align-items: center;
+
+			.settings {
+				$width: 2px;
+				width: 30px;
+				height: 30px;
+				display: flex;
+				flex-flow: column;
+				justify-content: space-around;
+				margin: 0 $padding;
+
+				span {
+					display: block;
+					background: #FFF;
+					height: $width;
+					width: 100%;
+					min-width: 100%;
+					position: relative;
+
+					&:after {
+						position: absolute;
+						content: '';
+						display: block;
+						height: $width * 3;
+						background: #FFF;
+						width: 20%;
+						top: 50%;
+						transform: translateY(-50%);
+					}
+
+					&:nth-child(1):after{ left: 20%; }
+					&:nth-child(2):after{ left: 60%; }
+					&:nth-child(3):after{ left: 30%; }
+				}
+
+			}
+
+			.add {
+				position: relative;
+				display: block;
+				width: 40px;
+				height: 40px;
+
+				span {
+					position: absolute;
+					display: block;
+					background: #FFF;
+					top: 50%;
+					left: 50%;
+					transform: translate(-50%, -50%);
+
+					&:first-child {
+						height: 50%;
+						width: 5%;
+					}
+
+					&:last-child {
+						width: 50%;
+						height: 5%;
+					}
+				}
 			}
 		}
-	}
 
-	.actions {
-		height: 100%;
-		width: auto;
-		display: flex;
-		align-items: center;
-		padding-right: $padding;
+		.devices {
+			height: 100%;
+			display: flex;
+			align-items: center;
 
-		.add {
-			position: relative;
-			display: block;
-			width: 40px;
-			height: 40px;
-
-			span {
-				position: absolute;
-				display: block;
-				background: #FFF;
-				top: 50%;
-				left: 50%;
-				transform: translate(-50%, -50%);
+			.device {
+				width: auto;
+				display: inline-block;
+				opacity: 1;
+				padding: 0 $padding*1.25;
+				border: 1px dashed #FFF;
+				border-width: 0 1px 0 0;
 
 				&:first-child {
-					height: 50%;
-					width: 5%;
+					border-left-width: 1px;
 				}
 
-				&:last-child {
-					width: 50%;
-					height: 5%;
+				&.hidden {
+					opacity: .1;
+					transform: scale(.7);
+				}
+
+				.change-size {
+					display: block;
+					width: 100%;
+					text-align: center;
+				}
+
+				&.hide-shrink .shrink,
+				&.hide-grow .grow {
+					pointer-events: none;
+					opacity: 0;
 				}
 			}
 		}
+
 	}
 
-	.devices {
-		height: 100%;
-		display: flex;
-		align-items: center;
-
-		a {
-			width: auto;
-			display: inline-block;
-			opacity: 1;
-			padding: 0 $padding*1.25;
-			border: 1px dashed #FFF;
-			border-width: 0 1px 0 0;
-
-			&:first-child {
-				border-left-width: 1px;
-			}
-
-			&.hidden {
-				opacity: .1;
-				transform: scale(.7);
-			}
-
-			path {
-				fill: #FFF;
-			}
-		}
+	.sub {
+		height: 80px;
+		background: rgba(255,255,255,.1);
 	}
+
 }
 
 .device {
@@ -317,7 +393,7 @@ body {
 		position: absolute;
 		width: auto;
 		top: 0;
-		right: 0;
+		right: 100px;
 		left: 100px;
 		z-index: 2;
 		height: $header-height;
@@ -360,7 +436,7 @@ body {
 	}
 
 	webview {
-		position: absolute;
+		position: fixed;
 		top: $header-height;
 		right: 0;
 		bottom: 0;
