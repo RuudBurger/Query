@@ -13,10 +13,16 @@ import $ from 'jquery';
 export default React.createClass({
 
 	getInitialState(){
+		var w = $(window),
+			width = w.width(),
+			height = w.height() - 44;
+
 		return {
+			failed: false,
 			url: 'https://github.com/RuudBurger/Query',
-			height: 0,
-			width: 0
+			userAgent: null,
+			height: height,
+			width: width
 		}
 	},
 
@@ -34,19 +40,32 @@ export default React.createClass({
 			ipc.send('set-url', e.url);
 		});
 
-		wv.addEventListener("did-start-loading", this.toggleLoader);
-		wv.addEventListener("did-stop-loading", this.toggleLoader);
+		wv.addEventListener('did-start-loading', this.startLoader);
+		wv.addEventListener('did-stop-loading', this.stopLoader);
+
+		wv.addEventListener('did-fail-load', this.showFailed);
 	},
 
-	toggleLoader(){
+	showFailed(e){
 		this.setState({
-			loading: this.refs.webview.isLoading()
-		})
+			failed: true
+		});
+	},
+
+	startLoader(){
+		this.setState({
+			failed: false,
+			loading: true
+		});
+	},
+
+	stopLoader(){
+		this.setState({
+			loading: false
+		});
 	},
 
 	updateUrl(e, url){
-		//p('update URL', url, this.state.url, this.refs.webview.src);
-
 		if(url != this.state.url && url != this.refs.webview.src){
 			this.setState({
 				url: url
@@ -66,13 +85,24 @@ export default React.createClass({
 	},
 
 	onSizeChange(){
-		var size = this.refs.size.value.split(/\sx/);
-		var width = Math.max(200, parseInt(size[0] || 400));
-		var height = Math.max(200, parseInt(size[size.length-1] || 400));
+		this.setState({
+			width: parseInt(this.refs.size_x.value),
+			height: parseInt(this.refs.size_y.value)
+		});
+	},
 
-		p(size, width, height);
-		//p(size[0] || 400, size[size.length-1] || 400);
-		remote.getCurrentWindow().setSize(width, height);
+	doChangeSize(e){
+		if(e.which == 13 || e.which === undefined) {
+			var width = Math.max(200, parseInt(this.state.width) || 400);
+			var height = Math.max(200, parseInt(this.state.height) || 400);
+
+			var size = electron.screen.getPrimaryDisplay().workAreaSize;
+
+			width = Math.min(size.width, width);
+			height = Math.min(size.height, height);
+
+			remote.getCurrentWindow().setSize(width, height + 44);
+		}
 	},
 
 	close(){
@@ -84,15 +114,22 @@ export default React.createClass({
 	},
 
 	render(){
-		var size = <input ref="size" type="text"
-						  value={this.state.width + ' x ' + this.state.height}
-						  defaultValue={this.state.width + ' x ' + this.state.height}
-						  onChange={this.onSizeChange} />;
-
 		return (
-			<div className="device">
+			<div className={'device ' + (this.state.failed ? 'failed' : '')}>
 				<div className="title-controls">
-					{size}
+					<div className="input">
+						<input ref="size_x" type="text"
+							   value={this.state.width}
+							   onChange={this.onSizeChange}
+							   onKeyDown={this.doChangeSize}
+							   onBlur={this.doChangeSize} />
+						x
+						<input ref="size_y" type="text"
+							   value={this.state.height}
+							   onChange={this.onSizeChange}
+							   onKeyDown={this.doChangeSize}
+							   onBlur={this.doChangeSize} />
+					</div>
 					<div className="loading">{this.state.loading ? <IndeterminateProgressWheel /> : null }</div>
 				</div>
 				<TitleBar className="title-bar"
@@ -101,7 +138,14 @@ export default React.createClass({
 					  onClosePress={this.close}
 					  onMinimizePress={this.minimize}
 				/>
-				<webview ref="webview" src={this.state.url} />
+				<webview ref="webview"
+						 src={this.state.url}
+						 useragent={this.state.userAgent}
+						 partition="persist:github"
+				/>
+				<div className="failed-overlay">
+					Failed loading {this.state.url}
+				</div>
 			</div>
 		);
 	}

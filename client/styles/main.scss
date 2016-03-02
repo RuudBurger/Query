@@ -100,7 +100,7 @@ a {
 			.button {
 				left: 85%;
 				top: 50%;
-				transform: translateY(50%);
+				transform: translateY(-50%);
 			}
 
 			.screen {
@@ -347,12 +347,15 @@ a {
 			align-items: center;
 
 			.device {
-				width: auto;
-				display: inline-block;
+				cursor: pointer;
+				position: relative;
+				display: block;
 				opacity: 1;
 				padding: 0 $padding*1.25;
 				border: 1px dashed #FFF;
 				border-width: 0 1px 0 0;
+				display: flex;
+				align-items: center;
 
 				&:first-child {
 					border-left-width: 1px;
@@ -363,10 +366,54 @@ a {
 					transform: scale(.7);
 				}
 
+				.icon {
+					z-index: 1;
+				}
+
 				.change-size {
+					cursor: pointer;
+					position: absolute;
 					display: block;
 					width: 100%;
 					text-align: center;
+					height: 30px;
+					line-height: 30px;
+					left: 0;
+					transition: opacity 400ms, transform 400ms;
+					opacity: 0;
+					z-index: 2;
+
+					&:after {
+						content: '';
+						top: 50%;
+						left: 50%;
+						position: absolute;
+						width: 6px;
+						height: 6px;
+						border: 1px solid #FFF;
+						border-width: 1px 1px 0 0;
+						transform: translate3d(-50%, -50%, 0) rotate(-45deg);
+					}
+
+					&.grow {
+						top: 0;
+						transform: translate3d(0,10px,0);
+					}
+
+					&.shrink {
+						bottom: 0;
+						transform: translate3d(0, -10px,0);
+						transition-delay: 200ms;
+
+						&:after {
+							transform: translate3d(-50%, -50%, 0) rotate(135deg);
+						}
+					}
+				}
+
+				&:hover .change-size {
+					transform: translate3d(0,0,0);
+					opacity: 1;
 				}
 
 				&.hide-shrink .shrink,
@@ -387,33 +434,65 @@ a {
 }
 
 .device {
+	height: 100%;
 
 	.title-controls {
+		font-family: $font-body;
+		font-size: .75em;
+		line-height: $font-lineheight;
+
 		-webkit-app-region: drag;
 		position: absolute;
 		width: auto;
 		top: 0;
-		right: 100px;
-		left: 100px;
+		right: 50px;
+		left: 50px;
 		z-index: 2;
 		height: $header-height;
 		text-align: center;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 
-		input {
-			height: 100%;
-			text-align: center;
-			border: 0;
-			background: none;
+		.input {
+			width: 120px;
+			display: flex;
 
-			&:focus {
-				outline: none;
+			input {
+				line-height: inherit;
+				font-size: inherit;
+				height: 100%;
+				text-align: left;
+				border: 0;
+				background: none;
+				width: 100%;
+				margin: 0 $padding/2;
+				padding: 0 $padding/2;
+				border-radius: 2px;
+
+				&:focus {
+					outline: none;
+					background-image: linear-gradient(-90deg, rgba(255,255,255,0), rgba(255,255,255,.5));
+				}
+
+				&:first-child {
+					text-align: right;
+
+					&:focus {
+						background-image: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.5));
+					}
+				}
+			}
+
+			span {
+				transform: scaleY(.75);
 			}
 		}
 
 		.loading {
 			z-index: 2;
 			position: absolute;
-			right: $padding;
+			right: $padding - 50px;
 			top: $header-height/2;
 			transform: translateY(-50%);
 		}
@@ -441,6 +520,34 @@ a {
 		right: 0;
 		bottom: 0;
 		left: 0;
+		z-index: 1;
+	}
+
+	.failed-overlay {
+		font-family: $font-body;
+		line-height: $font-lineheight;
+
+		background: #FFF;
+		position: fixed;
+		top: $header-height;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		opacity: 0;
+		z-index: 2;
+		display: flex;
+		flex-flow: column;
+		align-items: center;
+		justify-content: center;
+		visibility: hidden;
+		transition: all 400ms;
+	}
+
+	&.failed {
+		.failed-overlay {
+			visibility: visible;
+			opacity: 1;
+		}
 	}
 
 }

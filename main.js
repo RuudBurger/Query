@@ -66,12 +66,15 @@ electron.ipcMain.on('toggle-device', function(e, nr, width, height){
 		// Emitted when the window is closed.
 		w.on('closed', function() {
 			w = null;
-			device_windows[nr] = null;
-			mainWindow.webContents.send('close-device', nr);
+			device_windows.splice(nr, 1);
+
+			if(mainWindow && mainWindow.webContents){
+				mainWindow.webContents.send('close-device', nr);
+			}
 		});
 
 		w.loadURL('http://127.0.0.1:9010/#/device');
-		w.webContents.openDevTools();
+		//w.webContents.openDevTools();
 	}
 
 });
@@ -81,6 +84,7 @@ electron.ipcMain.on('resize-device', function(e, nr, width, height){
 	var w = device_windows[nr];
 	if (w) {
 		w.focus();
+		mainWindow.focus();
 
 		var current = w.getBounds();
 
@@ -92,16 +96,9 @@ electron.ipcMain.on('resize-device', function(e, nr, width, height){
 		current.x = current.x + (diff_width/2);
 		current.y = current.y + (diff_height/2);
 
-		console.log(diff_width, diff_width);
-
 		w.setBounds(current, true);
 	}
 
-});
-
-electron.ipcMain.on('close-device', function(e){
-	console.log(e);
-	//e.sender.close();
 });
 
 electron.ipcMain.on('set-url', function(e, url){

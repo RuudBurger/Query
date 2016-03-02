@@ -13,10 +13,10 @@ export default React.createClass({
 
 	timeout: null,
 	devices: [
-		{type: 'phone', size: [320, 480]},
-		{type: 'phone', orientation: 'landscape', size: [480, 320]},
-		{type: 'tablet', size: [768, 1024]},
-		{type: 'tablet', orientation: 'landscape', size: [1024, 768]},
+		{type: 'phone', size: [320, 480], userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B137 Safari/601.1'},
+		{type: 'phone', orientation: 'landscape', size: [480, 320], userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B137 Safari/601.1'},
+		{type: 'tablet', size: [768, 1024], userAgent: 'Mozilla/5.0 (iPad; CPU OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B137 Safari/601.1'},
+		{type: 'tablet', orientation: 'landscape', size: [1024, 768], userAgent: 'Mozilla/5.0 (iPad; CPU OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B137 Safari/601.1'},
 		{type: 'laptop', size: [1280, 700]},
 		{type: 'desktop', size: [1680, 1200]},
 		{type: 'tv', size: [1920, 1080]}
@@ -25,7 +25,7 @@ export default React.createClass({
 	getInitialState(){
 		return {
 			url: '',
-			devices: [0, 3]
+			devices: [0]
 		}
 	},
 
@@ -38,7 +38,7 @@ export default React.createClass({
 	componentWillMount(){
 
 		this.enabledDevices().forEach((dev, nr) => {
-			ipc.send('toggle-device', nr, dev.size[0], dev.size[1] + 44);
+			ipc.send('toggle-device', nr, dev.size[0], dev.size[1] + 44, dev.userAgent || null);
 		});
 
 		ipc.on('set-url', this.updateUrl);
@@ -46,8 +46,6 @@ export default React.createClass({
 	},
 
 	closeDevice(e, nr){
-		p('closeDevice', e, nr);
-
 		var devices = this.state.devices;
 			devices.splice(nr, 1);
 
@@ -146,9 +144,9 @@ export default React.createClass({
 			return <div className={classes} key={'device-' + nr}
 						data-device={this.state.devices[nr]}
 						onWheel={this.deviceScroll.bind(this, nr)}>
-				<a className="change-size grow" href="#" onClick={this.deviceGrow.bind(this, nr)}>+</a>
+				<a className="change-size grow" href="#" onClick={this.deviceGrow.bind(this, nr)}></a>
 				<Device type={dev.type} orientation={dev.orientation || null} />
-				<a className="change-size shrink" href="#" onClick={this.deviceShrink.bind(this, nr)}>-</a>
+				<a className="change-size shrink" href="#" onClick={this.deviceShrink.bind(this, nr)}></a>
 			</div>
 		});
 
