@@ -19,7 +19,7 @@ export default React.createClass({
 
 		return {
 			failed: false,
-			url: 'https://github.com/RuudBurger/Query',
+			url: '',
 			userAgent: null,
 			height: height,
 			width: width
@@ -32,17 +32,10 @@ export default React.createClass({
 		ipc.on('set-url', this.updateUrl);
 
 		var wv = this.refs.webview;
-		wv.addEventListener('will-navigate', function(e){
-			ipc.send('set-url', e.url);
-		});
-
-		wv.addEventListener('did-navigate-in-page', function(e){
-			ipc.send('set-url', e.url);
-		});
-
+		wv.addEventListener('will-navigate', function(e){ ipc.send('set-url', e.url); });
+		wv.addEventListener('did-navigate-in-page', function(e){ ipc.send('set-url', e.url); });
 		wv.addEventListener('did-start-loading', this.startLoader);
 		wv.addEventListener('did-stop-loading', this.stopLoader);
-
 		wv.addEventListener('did-fail-load', this.showFailed);
 	},
 
