@@ -97,7 +97,7 @@ export default React.createClass({
 
 		var last_device = this.state.devices[this.state.devices.length - 1];
 		var new_device_nr = last_device + 1;
-		var new_device = this.devices[new_device_nr];
+		var new_device = this.devices[new_device_nr] || this.devices[0];
 
 		var devices = this.state.devices;
 			devices.push(new_device_nr);
@@ -106,7 +106,7 @@ export default React.createClass({
 			devices: devices
 		});
 
-		ipc.send('toggle-device', this.state.devices.length, new_device.size[0], new_device.size[1] + 44, new_device.userAgent || null);
+		ipc.send('toggle-device', this.state.devices.length-1, new_device.size[0], new_device.size[1] + 44, new_device.userAgent || null);
 	},
 
 	enabledDevices(){
@@ -177,7 +177,7 @@ export default React.createClass({
 							   onChange={this.onChange} />
 					</div>
 					<div className="actions">
-						<a href="#" className="settings" onClick={this.toggleSettings}><span /><span /><span /></a>
+						<a href="#" style={{display: 'none'}} className="settings" onClick={this.toggleSettings}><span /><span /><span /></a>
 						<div className="devices">
 							{devices}
 						</div>

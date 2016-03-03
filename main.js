@@ -8,6 +8,7 @@ let mainWindow;
 var settings_shown = false;
 var device_windows = [];
 var window_size = [750, 80];
+var current_url = null;
 
 var createWindow = function () {
 	mainWindow = new BrowserWindow({
@@ -24,6 +25,10 @@ var createWindow = function () {
 
 	mainWindow.webContents.openDevTools({
 		detach: true
+	});
+
+	mainWindow.webContents.on('did-finish-load', function(){
+		mainWindow.webContents.send('set-url', current_url);
 	});
 
 	// Emitted when the window is closed.
@@ -74,12 +79,16 @@ electron.ipcMain.on('toggle-device', function(e, nr, width, height){
 		});
 
 		w.loadURL('http://127.0.0.1:9010/#/device');
+		w.webContents.on('did-finish-load', function(){
+			w.webContents.send('set-url', current_url);
+		});
 		//w.webContents.openDevTools();
 	}
 
 });
 
 electron.ipcMain.on('resize-device', function(e, nr, width, height){
+	//console.log('resize-device', nr, width, height);
 
 	var w = device_windows[nr];
 	if (w) {
@@ -107,6 +116,8 @@ electron.ipcMain.on('set-url', function(e, url){
 	device_windows.forEach(w => {
 		w.webContents.send('set-url', url);
 	});
+
+	current_url = url;
 });
 
 electron.ipcMain.on('toggle-settings', function(e){

@@ -141,7 +141,7 @@ export default React.createClass({
 				<webview ref="webview"
 						 src={this.state.url}
 						 useragent={this.state.userAgent}
-						 partition="persist:github"
+						 partition="query"
 				/>
 				<div className="failed-overlay">
 					Failed loading {this.state.url}
