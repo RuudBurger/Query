@@ -39,7 +39,7 @@ export default React.createClass({
 		wv.addEventListener('did-fail-load', this.showFailed);
 	},
 
-	showFailed(e){
+	showFailed(){
 		this.setState({
 			failed: true
 		});

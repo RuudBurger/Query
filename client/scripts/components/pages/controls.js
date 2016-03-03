@@ -12,6 +12,9 @@ import Device from '../icon';
 export default React.createClass({
 
 	timeout: null,
+	scroll: true,
+	prev_scroll: 0,
+
 	devices: [
 		{type: 'phone', size: [320, 480], userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B137 Safari/601.1'},
 		{type: 'phone', orientation: 'landscape', size: [480, 320], userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B137 Safari/601.1'},
@@ -96,7 +99,7 @@ export default React.createClass({
 		(e).preventDefault();
 
 		var last_device = this.state.devices[this.state.devices.length - 1];
-		var new_device_nr = last_device + 1;
+		var new_device_nr = (last_device + 1) || 0;
 		var new_device = this.devices[new_device_nr] || this.devices[0];
 
 		var devices = this.state.devices;
@@ -106,7 +109,7 @@ export default React.createClass({
 			devices: devices
 		});
 
-		ipc.send('toggle-device', this.state.devices.length-1, new_device.size[0], new_device.size[1] + 44, new_device.userAgent || null);
+		ipc.send('toggle-device', this.state.devices.length, new_device.size[0], new_device.size[1] + 44, new_device.userAgent || null);
 	},
 
 	enabledDevices(){
@@ -114,9 +117,11 @@ export default React.createClass({
 	},
 
 	deviceGrow(device_nr, e){
-		(e).preventDefault();
+		if(e) e.preventDefault();
+
 		var devices = this.state.devices;
 		devices[device_nr] = devices[device_nr]+1;
+		devices[device_nr] = devices[device_nr] <= this.devices.length - 1 ? devices[device_nr] : this.devices.length - 1;
 
 		this.setState({
 			devices: devices
@@ -126,9 +131,11 @@ export default React.createClass({
 	},
 
 	deviceShrink(device_nr, e){
-		(e).preventDefault();
+		if(e) e.preventDefault();
+
 		var devices = this.state.devices;
 		devices[device_nr] = devices[device_nr]-1;
+		devices[device_nr] = devices[device_nr] >= 0 ? devices[device_nr] : 0;
 
 		this.setState({
 			devices: devices
@@ -143,11 +150,19 @@ export default React.createClass({
 	},
 
 	deviceScroll(device_nr, e){
-		if(e.deltaY < 0 && this.state.devices[device_nr] < this.devices.length-1){
-			this.deviceGrow(device_nr, e);
-		}
-		else if(e.deltaY > 0 && this.state.devices[device_nr] > 0) {
-			this.deviceShrink(device_nr, e);
+		(e).preventDefault();
+		if(!this.scroll || e.deltaY == 0) return;
+
+		var t = Date.now(),
+			diff = t - this.prev_scroll;
+		if(diff > 1000){
+			if(e.deltaY < 0 && this.state.devices[device_nr] < this.devices.length-1){
+				this.deviceGrow(device_nr);
+			}
+			else if(e.deltaY > 0 && this.state.devices[device_nr] > 0) {
+				this.deviceShrink(device_nr);
+			}
+			this.prev_scroll = t;
 		}
 	},
 
@@ -162,7 +177,7 @@ export default React.createClass({
 						data-device={this.state.devices[nr]}
 						onWheel={this.deviceScroll.bind(this, nr)}>
 				<a className="change-size grow" href="#" onClick={this.deviceGrow.bind(this, nr)}></a>
-				<Device type={dev.type} orientation={dev.orientation || null} />
+				<Device type={dev.type} orientation={dev.orientation || null} nr={nr+1} />
 				<a className="change-size shrink" href="#" onClick={this.deviceShrink.bind(this, nr)}></a>
 			</div>
 		});

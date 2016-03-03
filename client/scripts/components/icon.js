@@ -12,7 +12,7 @@ export default React.createClass({
 
 		return (
 			<div className={classes}>
-				<div className="screen" />
+				<div className="screen">{this.props.nr}</div>
 				<div className="button" />
 				<div className="stand" />
 			</div>

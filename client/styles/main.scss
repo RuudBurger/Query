@@ -73,6 +73,11 @@ a {
 		bottom: $border;
 		left: $border;
 		transition: all 400ms;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: .7em;
+		font-weight: bold;
 	}
 
 	&.phone, &.tablet {
@@ -238,7 +243,6 @@ a {
 		}
 
 		display: flex;
-
 		-webkit-app-region: drag;
 
 		.input {
@@ -255,6 +259,7 @@ a {
 				border: 0;
 				background: rgba(255,255,255,.05);
 				border: 1px solid transparent;
+				-webkit-app-region: no-drag;
 
 				&::-webkit-input-placeholder {
 					color: rgba(255,255,255,.7);

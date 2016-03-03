@@ -83,6 +83,8 @@ electron.ipcMain.on('toggle-device', function(e, nr, width, height){
 			w.webContents.send('set-url', current_url);
 		});
 		//w.webContents.openDevTools();
+
+		mainWindow.focus();
 	}
 
 });
@@ -100,10 +102,10 @@ electron.ipcMain.on('resize-device', function(e, nr, width, height){
 		var diff_width = current.width - width,
 			diff_height = current.height - height;
 
-		current.width = width;
-		current.height = height;
-		current.x = current.x + (diff_width/2);
-		current.y = current.y + (diff_height/2);
+		current.width = Math.round(width);
+		current.height = Math.round(height);
+		current.x = Math.round(Math.max(0, current.x + (diff_width/2)));
+		current.y = Math.round(Math.max(0, current.y + (diff_height/2)));
 
 		w.setBounds(current, true);
 	}
