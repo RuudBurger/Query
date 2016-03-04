@@ -6,7 +6,7 @@ const BrowserWindow = electron.BrowserWindow;
 
 let mainWindow;
 var settings_shown = false;
-var device_windows = [];
+var device_windows = {};
 var window_size = [750, 80];
 var current_url = null;
 
@@ -14,10 +14,9 @@ var createWindow = function () {
 	mainWindow = new BrowserWindow({
 		width: window_size[0],
 		height: window_size[1],
-		x: 2000,
-		y: 1500,
 		resizable: false,
 		maximizable: false,
+		title: 'Sizer',
 		frame: false
 	});
 
