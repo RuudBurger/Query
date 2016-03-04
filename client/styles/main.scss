@@ -386,7 +386,7 @@ a {
 					left: 0;
 					transition: opacity 400ms, transform 400ms;
 					opacity: 0;
-					z-index: 2;
+					z-index: 2000;
 
 					&:after {
 						content: '';
@@ -398,6 +398,12 @@ a {
 						border: 1px solid #FFF;
 						border-width: 1px 1px 0 0;
 						transform: translate3d(-50%, -50%, 0) rotate(-45deg);
+					}
+
+					&:hover {
+						&:after {
+							background: #FFF;
+						}
 					}
 
 					&.grow {

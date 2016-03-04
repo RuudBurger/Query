@@ -55,9 +55,8 @@ app.on('activate', function () {
 });
 
 // Device windows
-electron.ipcMain.on('toggle-device', function(e, nr, width, height){
-
-	var w = device_windows[nr];
+electron.ipcMain.on('add-device', function(e, id, width, height){
+	var w = device_windows[id];
 	if (!w) {
 		w = new BrowserWindow({
 			width: width || 600,
@@ -66,15 +65,16 @@ electron.ipcMain.on('toggle-device', function(e, nr, width, height){
 			minWidth: 200,
 			frame: false
 		});
-		device_windows[nr] = w;
+		device_windows[id] = w;
 
 		// Emitted when the window is closed.
 		w.on('closed', function() {
+
 			w = null;
-			device_windows.splice(nr, 1);
+			delete device_windows[id];
 
 			if(mainWindow && mainWindow.webContents){
-				mainWindow.webContents.send('close-device', nr);
+				mainWindow.webContents.send('close-device', id);
 			}
 		});
 
@@ -89,10 +89,10 @@ electron.ipcMain.on('toggle-device', function(e, nr, width, height){
 
 });
 
-electron.ipcMain.on('resize-device', function(e, nr, width, height){
-	//console.log('resize-device', nr, width, height);
+electron.ipcMain.on('resize-device', function(e, id, width, height){
+	//console.log('resize-device', id, width, height, device_windows.length);
 
-	var w = device_windows[nr];
+	var w = device_windows[id];
 	if (w) {
 		w.focus();
 		mainWindow.focus();
@@ -112,11 +112,23 @@ electron.ipcMain.on('resize-device', function(e, nr, width, height){
 
 });
 
+electron.ipcMain.on('focus-device', function(e, id){
+	//console.log('focus-device', id);
+
+	var w = device_windows[id];
+	if (w) {
+		w.focus();
+		mainWindow.focus();
+	}
+});
+
 electron.ipcMain.on('set-url', function(e, url){
 	mainWindow.webContents.send('set-url', url);
 
-	device_windows.forEach(w => {
-		w.webContents.send('set-url', url);
+	Object.keys(device_windows).forEach(k => {
+		if(device_windows[k]){
+			device_windows[k].webContents.send('set-url', url);
+		}
 	});
 
 	current_url = url;

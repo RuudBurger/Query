@@ -39,10 +39,12 @@ export default React.createClass({
 		wv.addEventListener('did-fail-load', this.showFailed);
 	},
 
-	showFailed(){
-		this.setState({
-			failed: true
-		});
+	showFailed(e){
+		if(e.validatedURL, this.state.url + '/', e.validatedURL == this.state.url + '/'){
+			this.setState({
+				failed: true
+			});
+		}
 	},
 
 	startLoader(){

@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+//import ReactDOM from 'react-dom';
 import Reflux from 'reflux';
 import {History} from 'react-router';
 
@@ -29,12 +29,12 @@ export default React.createClass({
 
 	componentDidMount(){
 
-		this.wrapper = $(ReactDOM.findDOMNode(this.refs.wrapper));
+		//this.wrapper = $(ReactDOM.findDOMNode(this.refs.wrapper));
 
 		// Catch clicks and touch events
-		this.wrapper
+		//this.wrapper
 			//.on('click', 'a, button, .button', this.ripple)
-			.on('touchstart', 'a, button, .button', this.ripple);
+			//.on('touchstart', 'a, button, .button', this.ripple);
 			//.on('mousedown', 'a', this.navigate)
 			//.on('touchstart', 'a', this.navigate)
 

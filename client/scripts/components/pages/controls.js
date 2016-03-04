@@ -4,10 +4,10 @@ import React from 'react';
 //import Reflux from 'reflux';
 var electron = window.require('electron');
 var ipc = electron.ipcRenderer;
+import Device from '../icon';
 
 import classNames from 'classnames';
 
-import Device from '../icon';
 
 export default React.createClass({
 
@@ -26,34 +26,36 @@ export default React.createClass({
 	],
 
 	getInitialState(){
-		return {
-			url: '',
-			devices: [0]
-		}
-	},
-
-	componentDidMount(){
-		//setInterval(() => {
-		//	this.setState({});
-		//}, 2000);
+		var saved_state = ls.get('control-state') || {};
+		return Object.assign({
+			url: 'http://sizer.xyz/',
+			devices: [{
+				id: this.getId(),
+				device: 0
+			}]
+		}, saved_state);
 	},
 
 	componentWillMount(){
-
-		this.enabledDevices().forEach((dev, nr) => {
-			ipc.send('toggle-device', nr, dev.size[0], dev.size[1] + 44, dev.userAgent || null);
+		this.enabledDevices().forEach(dev => {
+			this.addDevice(dev);
 		});
 
 		ipc.on('set-url', this.updateUrl);
 		ipc.on('close-device', this.closeDevice);
 	},
 
-	closeDevice(e, nr){
-		var devices = this.state.devices;
-			devices.splice(nr, 1);
+	componentWillUpdate(nextProps, nextState){
+		ls.set('control-state', nextState);
+	},
 
+	getId(){
+		return 'id-' + Date.now() + '-' + ((1.1+Math.random()).toString(36).substring(2, 7));
+	},
+
+	closeDevice(e, device_id){
 		this.setState({
-			devices: devices
+			devices: this.state.devices.filter(device =>  device.id != device_id)
 		});
 	},
 
@@ -95,90 +97,108 @@ export default React.createClass({
 		ipc.send('toggle-settings');
 	},
 
-	addDevice(e){
-		(e).preventDefault();
+	addDevice(device, e){
+		if(e) e.preventDefault();
 
-		var last_device = this.state.devices[this.state.devices.length - 1];
-		var new_device_nr = (last_device + 1) || 0;
-		var new_device = this.devices[new_device_nr] || this.devices[0];
+		if(!device){
+			var last_device = this.state.devices[this.state.devices.length - 1] || {device: -1};
+			var new_device_nr = device !== null ? device : (last_device.device + 1) || 0;
+			device = {
+				id: this.getId(),
+				device: new_device_nr
+			};
 
-		var devices = this.state.devices;
-			devices.push(new_device_nr);
+			var devices = this.state.devices;
+			devices.push(device);
 
-		this.setState({
-			devices: devices
-		});
+			this.setState({
+				devices: devices
+			});
+		}
 
-		ipc.send('toggle-device', this.state.devices.length, new_device.size[0], new_device.size[1] + 44, new_device.userAgent || null);
+		var new_device = this.devices[device.device];
+		ipc.send('add-device', device.id, new_device.size[0], new_device.size[1] + 44, new_device.userAgent || null);
+
 	},
 
 	enabledDevices(){
-		return this.state.devices.map(nr => this.devices[nr]);
+		return this.state.devices;
 	},
 
-	deviceGrow(device_nr, e){
+	deviceGrow(device_id, e){
 		if(e) e.preventDefault();
 
-		var devices = this.state.devices;
-		devices[device_nr] = devices[device_nr]+1;
-		devices[device_nr] = devices[device_nr] <= this.devices.length - 1 ? devices[device_nr] : this.devices.length - 1;
+		var device = this.getDevice(device_id);
+			device.device += 1;
+			device.device = device.device <= this.devices.length - 1 ? device.device : this.devices.length - 1;
 
 		this.setState({
-			devices: devices
+			devices: this.state.devices
 		});
 
-		this.resizeDevice(device_nr);
+		this.resizeDevice(device_id);
 	},
 
-	deviceShrink(device_nr, e){
+	deviceShrink(device_id, e){
 		if(e) e.preventDefault();
 
-		var devices = this.state.devices;
-		devices[device_nr] = devices[device_nr]-1;
-		devices[device_nr] = devices[device_nr] >= 0 ? devices[device_nr] : 0;
+		var device = this.getDevice(device_id);
+		device.device -= 1;
+		device.device = device.device >= 0 ? device.device : 0;
 
 		this.setState({
-			devices: devices
+			devices: this.state.devices
 		});
 
-		this.resizeDevice(device_nr);
+		this.resizeDevice(device_id);
 	},
 
-	resizeDevice(device_nr){
-		var size = this.devices[this.state.devices[device_nr]].size;
-		ipc.send('resize-device', device_nr, size[0], size[1] + 44);
+	resizeDevice(device_id){
+		var size = this.devices[this.getDevice(device_id).device].size;
+		ipc.send('resize-device', device_id, size[0], size[1] + 44);
 	},
 
-	deviceScroll(device_nr, e){
+	deviceScroll(device_id, e){
 		(e).preventDefault();
 		if(!this.scroll || e.deltaY == 0) return;
 
 		var t = Date.now(),
 			diff = t - this.prev_scroll;
 		if(diff > 1000){
-			if(e.deltaY < 0 && this.state.devices[device_nr] < this.devices.length-1){
-				this.deviceGrow(device_nr);
+			if(e.deltaY < 0 && this.getDevice(device_id).device < this.devices.length-1){
+				this.deviceGrow(device_id);
 			}
-			else if(e.deltaY > 0 && this.state.devices[device_nr] > 0) {
-				this.deviceShrink(device_nr);
+			else if(e.deltaY > 0 && this.getDevice(device_id).device > 0) {
+				this.deviceShrink(device_id);
 			}
 			this.prev_scroll = t;
 		}
 	},
 
+	focusWindow(device_id){
+		ipc.send('focus-device', device_id);
+	},
+
+	getDevice(device_id){
+		return this.state.devices.find(dev => dev.id == device_id);
+	},
+
 	render(){
 		var devices = this.enabledDevices().map((dev, nr) => {
 			var classes = classNames('device', {
-				'hide-shrink': this.state.devices[nr] == 0,
-				'hide-grow': this.state.devices[nr] == this.devices.length-1
-			})
+				'hide-shrink': dev.device == 0,
+				'hide-grow': dev.device == this.devices.length-1
+			});
 
-			return <div className={classes} key={'device-' + nr}
-						data-device={this.state.devices[nr]}
-						onWheel={this.deviceScroll.bind(this, nr)}>
-				<a className="change-size grow" href="#" onClick={this.deviceGrow.bind(this, nr)}></a>
-				<Device type={dev.type} orientation={dev.orientation || null} nr={nr+1} />
-				<a className="change-size shrink" href="#" onClick={this.deviceShrink.bind(this, nr)}></a>
+			var device = this.devices[dev.device];
+
+			return <div className={classes} key={'device-' + dev.id}
+						data-device={dev.device}
+						onClick={this.focusWindow.bind(this, dev.id)}
+						onWheel={this.deviceScroll.bind(this, dev.id)}>
+				<a className="change-size grow" href="#" onClick={this.deviceGrow.bind(this, dev.id)}></a>
+				<Device type={device.type} orientation={device.orientation || null} nr={nr+1} />
+				<a className="change-size shrink" href="#" onClick={this.deviceShrink.bind(this, dev.id)}></a>
 			</div>
 		});
 
@@ -196,7 +216,7 @@ export default React.createClass({
 						<div className="devices">
 							{devices}
 						</div>
-						<a href="#" className="add" onClick={this.addDevice}><span /><span /></a>
+						<a href="#" className="add" onClick={this.addDevice.bind(this, null)}><span /><span /></a>
 					</div>
 				</div>
 				<div className="sub">
