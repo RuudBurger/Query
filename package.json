@@ -1,15 +1,17 @@
 {
   "name": "sizer",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "electron main.js",
-    "serve": "grunt serve"
+    "start": "NODE_ENV=development electron main.js",
+    "serve": "NODE_ENV=development grunt serve",
+    "build": "NODE_ENV=production grunt build; npm run build_osx",
+    "build_osx": "electron-packager ./dist/ Sizer --platform=darwin --arch=x64 --version=0.36.9 --app-version=0.1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com:RuudBurger/Query.git"
+    "url": "git+https://github.com:RuudBurger/Sizer.git"
   },
   "keywords": [
     "electron",
@@ -17,9 +19,9 @@
   ],
   "author": "Ruud Burger",
   "bugs": {
-    "url": "https://github.com/RuudBurger/Query/issues"
+    "url": "https://github.com/RuudBurger/Sizer/issues"
   },
-  "homepage": "https://github.com/RuudBurger/Query",
+  "homepage": "https://github.com/RuudBurger/Sizer",
   "devDependencies": {
     "babel-core": "^6.3.21",
     "babel-preset-es2015": "^6.0.15",

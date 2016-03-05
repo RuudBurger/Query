@@ -17,6 +17,12 @@ var taskConfig = function (grunt) {
 					'*.{ico,png,txt}',
 					'*.html'
 				]
+			},{
+				src: '<%= yeogurt.client %>/../main.js',
+				dest: '<%= yeogurt.dist %>/main.js',
+			},{
+				src: '<%= yeogurt.client %>/../package.json',
+				dest: '<%= yeogurt.dist %>/package.json',
 			}]
 		}
 	});

@@ -224,6 +224,8 @@ a {
 		-webkit-backface-visibility: hidden;
 	}
 
+	-webkit-overflow-scrolling: auto;
+
 	font-family: $font-body;
 	font-size: $font-size;
 	line-height: $font-lineheight;
@@ -354,13 +356,13 @@ a {
 			.device {
 				cursor: pointer;
 				position: relative;
-				display: block;
 				opacity: 1;
 				padding: 0 $padding*1.25;
 				border: 1px dashed #FFF;
 				border-width: 0 1px 0 0;
 				display: flex;
 				align-items: center;
+				transition: background 400ms;
 
 				&:first-child {
 					border-left-width: 1px;
@@ -432,6 +434,25 @@ a {
 					pointer-events: none;
 					opacity: 0;
 				}
+			}
+
+			&.has-focus {
+
+				.device {
+
+					.icon {
+						opacity: .4;
+					}
+
+					&.focused {
+						background: rgba(255,255,255,.2);
+
+						.icon {
+							opacity: 1;
+						}
+					}
+				}
+
 			}
 		}
 

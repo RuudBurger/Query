@@ -15,11 +15,12 @@ export default React.createClass({
 	getInitialState(){
 		var w = $(window),
 			width = w.width(),
-			height = w.height() - 44;
+			height = w.height() - 44,
+			saved_state = ls.get('control-state') || {};
 
 		return {
 			failed: false,
-			url: '',
+			url: saved_state.url || 'http://sizer.xyz',
 			userAgent: null,
 			height: height,
 			width: width
@@ -61,7 +62,8 @@ export default React.createClass({
 	},
 
 	updateUrl(e, url){
-		if(url != this.state.url && url != this.refs.webview.src){
+		//p(url, this.state.url, this.refs.webview.src);
+		if(url !== this.state.url || url !== this.refs.webview.src){
 			this.setState({
 				url: url
 			});

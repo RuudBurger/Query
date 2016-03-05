@@ -29,6 +29,7 @@ export default React.createClass({
 		var saved_state = ls.get('control-state') || {};
 		return Object.assign({
 			url: 'http://sizer.xyz/',
+			focused: null,
 			devices: [{
 				id: this.getId(),
 				device: 0
@@ -42,7 +43,10 @@ export default React.createClass({
 		});
 
 		ipc.on('set-url', this.updateUrl);
+		ipc.on('add-device', this.addDevice.bind(this, null));
 		ipc.on('close-device', this.closeDevice);
+		ipc.on('blur-device', this.blurDevice);
+		ipc.on('focus-device', this.focusDevice);
 	},
 
 	componentWillUpdate(nextProps, nextState){
@@ -56,6 +60,22 @@ export default React.createClass({
 	closeDevice(e, device_id){
 		this.setState({
 			devices: this.state.devices.filter(device =>  device.id != device_id)
+		});
+	},
+
+	blurDevice(e, device_id){
+		//p('blurDevice', device_id);
+		if(this.state.focused == device_id){
+			this.setState({
+				focused: null
+			});
+		}
+	},
+
+	focusDevice(e, device_id){
+		//p('focusDevice', device_id);
+		this.setState({
+			focused: device_id
 		});
 	},
 
@@ -89,7 +109,8 @@ export default React.createClass({
 
 	getURL(){
 		var url = this.refs.input.value;
-		return !/^https?:\/\//i.test(url) ? 'http://' + url : url;
+		url = !/^https?:\/\//i.test(url) ? 'http://' + url : url;
+		return url != 'http://' ? url : '';
 	},
 
 	toggleSettings(e){
@@ -98,7 +119,7 @@ export default React.createClass({
 	},
 
 	addDevice(device, e){
-		if(e) e.preventDefault();
+		if(e && e.preventDefault) e.preventDefault();
 
 		if(!device){
 			var last_device = this.state.devices[this.state.devices.length - 1] || {device: -1};
@@ -187,7 +208,8 @@ export default React.createClass({
 		var devices = this.enabledDevices().map((dev, nr) => {
 			var classes = classNames('device', {
 				'hide-shrink': dev.device == 0,
-				'hide-grow': dev.device == this.devices.length-1
+				'hide-grow': dev.device == this.devices.length-1,
+				'focused': this.state.focused && this.state.focused == dev.id
 			});
 
 			var device = this.devices[dev.device];
@@ -207,13 +229,13 @@ export default React.createClass({
 				<div className="main">
 					<div className="input">
 						<input value={this.state.url} defaultValue={this.state.url}
-							   ref="input" type="text" placeholder="https://yourresponsive.site"
+							   ref="input" type="text" placeholder="http://sizer.xyz"
 							   onKeyDown={this.onKeyDown}
 							   onChange={this.onChange} />
 					</div>
 					<div className="actions">
 						<a href="#" style={{display: 'none'}} className="settings" onClick={this.toggleSettings}><span /><span /><span /></a>
-						<div className="devices">
+						<div className={'devices ' + (this.state.focused ? 'has-focus' : '')}>
 							{devices}
 						</div>
 						<a href="#" className="add" onClick={this.addDevice.bind(this, null)}><span /><span /></a>

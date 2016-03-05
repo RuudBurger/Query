@@ -3,12 +3,23 @@
 const electron = require('electron');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
+const Menu = electron.Menu;
+const shell = electron.shell;
+
+const crashReporter = electron.crashReporter;
+crashReporter.start();
+
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+var developing = process.env.NODE_ENV == 'development';
+var root_url = developing ? 'http://127.0.0.1:9010/' : `file://${__dirname}/index.html`;
 
 let mainWindow;
-var settings_shown = false;
-var device_windows = {};
-var window_size = [750, 80];
-var current_url = null;
+let menu;
+let template;
+let settings_shown = false;
+let device_windows = {};
+let window_size = [750, 80];
+let current_url = null;
 
 var createWindow = function () {
 	mainWindow = new BrowserWindow({
@@ -20,11 +31,13 @@ var createWindow = function () {
 		frame: false
 	});
 
-	mainWindow.loadURL('http://127.0.0.1:9010/');
+	mainWindow.loadURL(root_url);
 
-	mainWindow.webContents.openDevTools({
-		detach: true
-	});
+	//if(developing){
+	//	mainWindow.webContents.openDevTools({
+	//		detach: true
+	//	});
+	//}
 
 	mainWindow.webContents.on('did-finish-load', function(){
 		mainWindow.webContents.send('set-url', current_url);
@@ -34,6 +47,8 @@ var createWindow = function () {
 	mainWindow.on('closed', function () {
 		mainWindow = null;
 	});
+
+	createMenu();
 
 };
 
@@ -77,9 +92,21 @@ electron.ipcMain.on('add-device', function(e, id, width, height){
 			}
 		});
 
-		w.loadURL('http://127.0.0.1:9010/#/device');
+		w.on('focus', function(){
+			if(mainWindow && mainWindow.webContents){
+				mainWindow.webContents.send('focus-device', id);
+			}
+		});
+
+		w.on('blur', function(){
+			if(mainWindow && mainWindow.webContents){
+				mainWindow.webContents.send('blur-device', id);
+			}
+		});
+
+		w.loadURL(root_url + '#/device');
 		w.webContents.on('did-finish-load', function(){
-			w.webContents.send('set-url', current_url);
+			if(current_url) w.webContents.send('set-url', current_url);
 		});
 		//w.webContents.openDevTools();
 
@@ -106,7 +133,7 @@ electron.ipcMain.on('resize-device', function(e, id, width, height){
 		current.x = Math.round(Math.max(0, current.x + (diff_width/2)));
 		current.y = Math.round(Math.max(0, current.y + (diff_height/2)));
 
-		w.setBounds(current, true);
+		w.setBounds(current);
 	}
 
 });
@@ -145,3 +172,135 @@ electron.ipcMain.on('toggle-settings', function(e){
 
 	mainWindow.setSize(width, height, true);
 });
+
+var createMenu = function(){
+	if (process.platform === 'darwin') {
+
+		template = [{
+			label: 'Sizer',
+			submenu: [{
+				label: 'About Sizer',
+				selector: 'orderFrontStandardAboutPanel:'
+			}, {
+				type: 'separator'
+			}, {
+				label: 'Hide Sizer',
+				accelerator: 'Command+H',
+				selector: 'hide:'
+			}, {
+				label: 'Hide Others',
+				accelerator: 'Command+Shift+H',
+				selector: 'hideOtherApplications:'
+			}, {
+				label: 'Show All',
+				selector: 'unhideAllApplications:'
+			}, {
+				type: 'separator'
+			}, {
+				label: 'Quit',
+				accelerator: 'Command+Q',
+				click() {
+					app.quit();
+				}
+			}]
+		}, {
+			label: 'View',
+			submenu: (process.env.NODE_ENV === 'development') ? [{
+				label: 'Reload',
+				accelerator: 'Command+R',
+				click() {
+					mainWindow.restart();
+				}
+			}, {
+				label: 'Toggle Developer Tools',
+				accelerator: 'Alt+Command+I',
+				click() {
+					mainWindow.toggleDevTools();
+				}
+			}] : []
+		}, {
+			label: 'Window',
+			submenu: [{
+				label: 'Minimize',
+				accelerator: 'Command+M',
+				selector: 'performMiniaturize:'
+			}, {
+				label: 'Close',
+				accelerator: 'Command+W',
+				selector: 'performClose:'
+			}, {
+				type: 'separator'
+			}, {
+				label: 'New Device',
+				accelerator: 'Command+N',
+				click() {
+					mainWindow.webContents.send('add-device');
+				}
+			}, {
+				type: 'separator'
+			}, {
+				label: 'Bring All to Front',
+				selector: 'arrangeInFront:'
+			}]
+		}, {
+			label: 'Help',
+			submenu: [{
+				label: 'Learn More',
+				click() {
+					shell.openExternal('http://sizer.xyz');
+				}
+			}, {
+				label: 'Search Issues',
+				click() {
+					shell.openExternal('https://github.com/RuudBurger/Sizer/issues');
+				}
+			}]
+		}];
+
+		menu = Menu.buildFromTemplate(template);
+		Menu.setApplicationMenu(menu);
+	} else {
+
+		template = [{
+			label: '&File',
+			submenu: [ {
+				label: '&Close',
+				accelerator: 'Ctrl+W',
+				click() {
+					mainWindow.close();
+				}
+			}]
+		}, {
+			label: '&View',
+			submenu: (process.env.NODE_ENV === 'development') ? [{
+				label: '&Reload',
+				accelerator: 'Ctrl+R',
+				click() {
+					mainWindow.restart();
+				}
+			}, {
+				label: 'Toggle &Developer Tools',
+				accelerator: 'Alt+Ctrl+I',
+				click() {
+					mainWindow.toggleDevTools();
+				}
+			}] : []
+		}, {
+			label: 'Help',
+			submenu: [{
+				label: 'Learn More',
+				click() {
+					shell.openExternal('http://sizer.xyz');
+				}
+			}, {
+				label: 'Search Issues',
+				click() {
+					shell.openExternal('https://github.com/RuudBurger/Sizer/issues');
+				}
+			}]
+		}];
+
+		menu = Menu.buildFromTemplate(template);
+		mainWindow.setMenu(menu);
+	}
+}
