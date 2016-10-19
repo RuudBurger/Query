@@ -20,7 +20,7 @@ export default React.createClass({
 
 		return {
 			failed: false,
-			url: saved_state.url || 'http://sizer.xyz',
+			url: saved_state.url || 'https://sizer.xyz',
 			userAgent: null,
 			height: height,
 			width: width

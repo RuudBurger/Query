@@ -1,13 +1,14 @@
 {
   "name": "sizer",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "main": "main.js",
   "scripts": {
     "start": "NODE_ENV=development electron main.js",
     "serve": "NODE_ENV=development grunt serve",
     "build": "NODE_ENV=production grunt build; npm run build_osx",
-    "build_osx": "electron-packager ./dist/ Sizer --platform=darwin --arch=x64 --version=0.36.9 --app-version=0.1"
+    "build_store": "npm run build; sh ./build.sh",
+    "build_osx": "electron-packager ./dist/ Sizer --platform=darwin --arch=x64 --version=0.36.9 --app-version=1.0 --app-bundle-id=nl.ruudburger.sizer"
   },
   "repository": {
     "type": "git",

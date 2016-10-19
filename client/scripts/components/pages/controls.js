@@ -28,7 +28,7 @@ export default React.createClass({
 	getInitialState(){
 		var saved_state = ls.get('control-state') || {};
 		return Object.assign({
-			url: 'http://sizer.xyz/',
+			url: 'https://sizer.xyz/',
 			focused: null,
 			devices: [{
 				id: this.getId(),
@@ -229,7 +229,7 @@ export default React.createClass({
 				<div className="main">
 					<div className="input">
 						<input value={this.state.url} defaultValue={this.state.url}
-							   ref="input" type="text" placeholder="http://sizer.xyz"
+							   ref="input" type="text" placeholder="https://sizer.xyz"
 							   onKeyDown={this.onKeyDown}
 							   onChange={this.onChange} />
 					</div>
